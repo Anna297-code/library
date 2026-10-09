@@ -110,8 +110,10 @@ function displayBooks() {
 
       const book = myLibrary.find((book) => book.id === bookID);
 
-      book.toggleRead();
-      displayBooks();
+      if (book) {
+        book.toggleRead();
+        displayBooks();
+      }
     });
   });
 }

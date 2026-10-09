@@ -25,12 +25,14 @@ function addBookToLibrary(title, author, pages, read) {
 const container = document.getElementById("container");
 
 // creating a DOM button and adding it to container to add a newBook button to the page
-const newBookButton = document.createElement("button");
-newBookButton.textContent = "Add Book";
-container.appendChild(newBookButton);
-
-// adding form to the DOM and calling it form
+const newBookButton = document.getElementById("new-book-button");
 const form = document.getElementById("form");
+const cancelButton = document.getElementById("cancel-button");
+
+cancelButton.addEventListener("click", function () {
+  form.reset();
+  form.classList.add("hidden");
+});
 
 //adding an event listener to the add book button that shows the form
 
@@ -73,20 +75,40 @@ function displayBooks() {
 
     //Display the book's detials
     card.style.whiteSpace = "pre-line";
-    card.textContent = `
-    Title: ${book.title} 
-    Author: ${book.author} 
-    Pages: ${book.pages} 
-    Read: ${book.read}`;
+
+    const titleElement = document.createElement("h2");
+    titleElement.textContent = `Title: ${book.title}`;
+    card.appendChild(titleElement);
+
+    const authorElement = document.createElement("p");
+    authorElement.textContent = `Author: ${book.author}`;
+    card.appendChild(authorElement);
+
+    const pagesElement = document.createElement("p");
+    pagesElement.textContent = `Pages: ${book.pages}`;
+    card.appendChild(pagesElement);
+
+    const readStatusElement = document.createElement("p");
+    readStatusElement.textContent = book.read ? "Read" : "Unread";
+    readStatusElement.classList.add("read-status");
+    if (book.read) {
+      readStatusElement.classList.add("is-read");
+    } else {
+      readStatusElement.classList.add("is-unread");
+    }
+    card.appendChild(readStatusElement);
 
     //Add the completed card to the page
     container.appendChild(card);
+
+    const buttonContainer = document.createElement("div");
+    buttonContainer.classList.add("card-buttons");
 
     const removeButton = document.createElement("button");
     removeButton.textContent = "Remove";
     removeButton.classList.add("remove-btn");
 
-    card.appendChild(removeButton);
+    buttonContainer.appendChild(removeButton);
 
     removeButton.addEventListener("click", function () {
       const bookID = card.dataset.id;
@@ -101,7 +123,7 @@ function displayBooks() {
 
     const toggleButton = document.createElement("button");
     toggleButton.classList.add("toggle-btn");
-    card.appendChild(toggleButton);
+    buttonContainer.appendChild(toggleButton);
 
     toggleButton.textContent = book.read ? "Mark as unread" : "Mark as read";
 
@@ -115,6 +137,8 @@ function displayBooks() {
         displayBooks();
       }
     });
+
+    card.appendChild(buttonContainer);
   });
 }
 

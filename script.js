@@ -10,6 +10,10 @@ function Book(title, author, pages, read) {
   this.id = crypto.randomUUID();
 }
 
+Book.prototype.toggleRead = function () {
+  this.read = !this.read;
+};
+
 //Made a function addBookToLibrary that takes any new books made and adds it to the end of myLibrary
 
 function addBookToLibrary(title, author, pages, read) {
@@ -93,6 +97,21 @@ function displayBooks() {
         myLibrary.splice(index, 1);
         displayBooks();
       }
+    });
+
+    const toggleButton = document.createElement("button");
+    toggleButton.classList.add("toggle-btn");
+    card.appendChild(toggleButton);
+
+    toggleButton.textContent = book.read ? "Mark as unread" : "Mark as read";
+
+    toggleButton.addEventListener("click", function () {
+      const bookID = card.dataset.id;
+
+      const book = myLibrary.find((book) => book.id === bookID);
+
+      book.toggleRead();
+      displayBooks();
     });
   });
 }

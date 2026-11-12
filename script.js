@@ -1,5 +1,3 @@
-
-
 class Book {
   constructor(title, author, pages, read) {
     this.title = title;
@@ -9,7 +7,7 @@ class Book {
     this.id = crypto.randomUUID();
   }
 
-  get readLabel() {
+  get readValue() {
     return this.read ? "Read" : "Not Read";
   }
 
@@ -18,6 +16,7 @@ class Book {
   }
 }
 
+// Library class
 class Library {
   #books = [];
 
@@ -47,22 +46,13 @@ class Library {
   }
 
   get books() {
-    const books = [...this.#books];
-    return books;
+    return [...this.#books];
   }
 }
 
-const myLibrary = [];
+const library = new Library();
 
-function addBookToLibrary(title, author, pages, read) {
-  const book = new Book(title, author, pages, read);
-  myLibrary.push(book);
-}
-
-// Adding container to DOM and calling it container
 const container = document.getElementById("container");
-
-// creating a DOM button and adding it to container to add a newBook button to the page
 const newBookButton = document.getElementById("new-book-button");
 const form = document.getElementById("form");
 const cancelButton = document.getElementById("cancel-button");
@@ -72,13 +62,11 @@ cancelButton.addEventListener("click", function () {
   form.classList.add("hidden");
 });
 
-//adding an event listener to the add book button that shows the form
-
 newBookButton.addEventListener("click", function () {
   form.classList.remove("hidden");
 });
 
-// adding an event listener that handles form submission, adds the details to myLibrary, displays the new book
+// Reads the form, asks library.add(...), then calls renderBooks to redraw.
 
 form.addEventListener("submit", function (event) {
   event.preventDefault();
@@ -88,98 +76,94 @@ form.addEventListener("submit", function (event) {
   const pages = document.getElementById("pages").value;
   const read = document.getElementById("read-status").checked;
 
-  addBookToLibrary(title, author, pages, read);
+  library.add(title, author, pages, read);
 
-  displayBooks();
+  renderBooks(library, container);
 
   form.reset();
   form.classList.add("hidden");
 });
 
-// a function that loops through the library, and adds each book to the container
-function displayBooks() {
-  // Remove the existing book cards before rebuilding the display
+//Clears the old cards, loops over library.books, gets a card for each book from createBookCard, and appends it to container.
+function renderBooks(library, container) {
   container.querySelectorAll(".card").forEach((card) => {
     card.remove();
   });
 
-  //Loop through the library array
-  myLibrary.forEach((book) => {
-    const card = document.createElement("div");
-    card.classList.add("card");
-
-    //Associate this card with its book
-    card.dataset.id = book.id;
-
-    //Display the book's detials
-    card.style.whiteSpace = "pre-line";
-
-    const titleElement = document.createElement("h2");
-    titleElement.textContent = `Title: ${book.title}`;
-    card.appendChild(titleElement);
-
-    const authorElement = document.createElement("p");
-    authorElement.textContent = `Author: ${book.author}`;
-    card.appendChild(authorElement);
-
-    const pagesElement = document.createElement("p");
-    pagesElement.textContent = `Pages: ${book.pages}`;
-    card.appendChild(pagesElement);
-
-    const readStatusElement = document.createElement("p");
-    readStatusElement.textContent = book.readLabel;
-    readStatusElement.classList.add("read-status");
-    if (book.readLabel === "Read") {
-      readStatusElement.classList.add("is-read");
-    } else {
-      readStatusElement.classList.add("is-unread");
-    }
-    card.appendChild(readStatusElement);
-
-    //Add the completed card to the page
+  library.books.forEach((book) => {
+    const card = createBookCard(book, library, container);
     container.appendChild(card);
-
-    const buttonContainer = document.createElement("div");
-    buttonContainer.classList.add("card-buttons");
-
-    const removeButton = document.createElement("button");
-    removeButton.textContent = "Remove";
-    removeButton.classList.add("remove-btn");
-
-    buttonContainer.appendChild(removeButton);
-
-    removeButton.addEventListener("click", function () {
-      const bookID = card.dataset.id;
-
-      const index = myLibrary.findIndex((book) => book.id === bookID);
-
-      if (index !== -1) {
-        myLibrary.splice(index, 1);
-        displayBooks();
-      }
-    });
-
-    const toggleButton = document.createElement("button");
-    toggleButton.classList.add("toggle-btn");
-
-    if (book.readLabel === "Read") {
-      toggleButton.textContent = "Mark as not read";
-    } else {
-      toggleButton.textContent = "Mark as read";
-    }
-
-    buttonContainer.appendChild(toggleButton);
-
-    toggleButton.addEventListener("click", function () {
-      const id = card.dataset.id;
-      const found = myLibrary.find((book) => book.id === id);
-
-      if (found) {
-        found.toggleRead();
-        displayBooks();
-      }
-    });
-
-    card.appendChild(buttonContainer);
   });
+}
+
+function createBookCard(book, library, container) {
+  //creates the card and adds all the values from the form to the html
+  const card = document.createElement("div");
+  card.classList.add("card");
+  card.dataset.id = book.id;
+  card.style.whiteSpace = "pre-line";
+
+  const titleElement = document.createElement("h2");
+  titleElement.textContent = `Title: ${book.title}`;
+  card.appendChild(titleElement);
+
+  const authorElement = document.createElement("p");
+  authorElement.textContent = `Author: ${book.author}`;
+  card.appendChild(authorElement);
+
+  const pagesElement = document.createElement("p");
+  pagesElement.textContent = `Pages: ${book.pages}`;
+  card.appendChild(pagesElement);
+
+  const readStatusElement = document.createElement("p");
+  readStatusElement.textContent = book.readValue;
+  readStatusElement.classList.add("read-status");
+  if (book.read) {
+    readStatusElement.classList.add("is-read");
+  } else {
+    readStatusElement.classList.add("is-unread");
+  }
+  card.appendChild(readStatusElement);
+
+  // Creates a button container and adds the remove and toggle buttons with their listeners
+
+  const buttonContainer = document.createElement("div");
+  buttonContainer.classList.add("card-buttons");
+
+  const removeButton = document.createElement("button");
+  removeButton.textContent = "Remove";
+  removeButton.classList.add("remove-btn");
+
+  buttonContainer.appendChild(removeButton);
+
+  removeButton.addEventListener("click", function () {
+    const id = card.dataset.id;
+    library.remove(id);
+    renderBooks(library, container);
+  });
+
+  const toggleButton = document.createElement("button");
+  toggleButton.classList.add("toggle-btn");
+
+  if (book.read) {
+    toggleButton.textContent = "Mark as not read";
+  } else {
+    toggleButton.textContent = "Mark as read";
+  }
+
+  buttonContainer.appendChild(toggleButton);
+
+  toggleButton.addEventListener("click", function () {
+    const id = card.dataset.id;
+    const book = library.find(id);
+
+    if (book) {
+      book.toggleRead();
+      renderBooks(library, container);
+    }
+  });
+
+  card.appendChild(buttonContainer);
+
+  return card;
 }

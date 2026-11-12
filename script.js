@@ -1,20 +1,24 @@
-//Made an empty array called myLibrary
-const myLibrary = [];
+// Turn function Book and Book.prototype.toggleRead into class Book { … }
 
-//Made an object constructor that is a template for creating books, avoids repetition
-function Book(title, author, pages, read) {
-  this.title = title;
-  this.author = author;
-  this.pages = pages;
-  this.read = read;
-  this.id = crypto.randomUUID();
+class Book {
+  constructor(title, author, pages, read) {
+    this.title = title;
+    this.author = author;
+    this.pages = Number(pages);
+    this.read = read;
+    this.id = crypto.randomUUID();
+  }
+
+  get readLabel() {
+    return this.read ? "Read" : "Not Read";
+  }
+
+  toggleRead() {
+    this.read = !this.read;
+  }
 }
 
-Book.prototype.toggleRead = function () {
-  this.read = !this.read;
-};
-
-//Made a function addBookToLibrary that takes any new books made and adds it to the end of myLibrary
+const myLibrary = [];
 
 function addBookToLibrary(title, author, pages, read) {
   const book = new Book(title, author, pages, read);
@@ -89,9 +93,9 @@ function displayBooks() {
     card.appendChild(pagesElement);
 
     const readStatusElement = document.createElement("p");
-    readStatusElement.textContent = book.read ? "Read" : "Unread";
+    readStatusElement.textContent = book.readLabel;
     readStatusElement.classList.add("read-status");
-    if (book.read) {
+    if (book.readLabel === "Read") {
       readStatusElement.classList.add("is-read");
     } else {
       readStatusElement.classList.add("is-unread");
@@ -123,17 +127,21 @@ function displayBooks() {
 
     const toggleButton = document.createElement("button");
     toggleButton.classList.add("toggle-btn");
+
+    if (book.readLabel === "Read") {
+      toggleButton.textContent = "Mark as not read";
+    } else {
+      toggleButton.textContent = "Mark as read";
+    }
+
     buttonContainer.appendChild(toggleButton);
 
-    toggleButton.textContent = book.read ? "Mark as unread" : "Mark as read";
-
     toggleButton.addEventListener("click", function () {
-      const bookID = card.dataset.id;
+      const id = card.dataset.id;
+      const found = myLibrary.find((book) => book.id === id);
 
-      const book = myLibrary.find((book) => book.id === bookID);
-
-      if (book) {
-        book.toggleRead();
+      if (found) {
+        found.toggleRead();
         displayBooks();
       }
     });
@@ -141,17 +149,3 @@ function displayBooks() {
     card.appendChild(buttonContainer);
   });
 }
-
-//removeButton.addEventListener("click", function (e) {
-//const currentCard = e.target.closest("div");
-
-//if (currentCard) {
-//currentCard.remove();
-//}
-//}
-// Click Remove
-// Identify the selected book using its ID
-// Remove from myLibrary
-// Find and remove the matching object
-// Call displayBooks()
-//Rebuild the cards using the updated array

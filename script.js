@@ -1,4 +1,4 @@
-// Turn function Book and Book.prototype.toggleRead into class Book { … }
+
 
 class Book {
   constructor(title, author, pages, read) {
@@ -15,6 +15,40 @@ class Book {
 
   toggleRead() {
     this.read = !this.read;
+  }
+}
+
+class Library {
+  #books = [];
+
+  add(title, author, pages, read) {
+    const book = new Book(title, author, pages, read);
+    this.#books.push(book);
+    return book;
+  }
+
+  find(id) {
+    for (const book of this.#books) {
+      if (book.id === id) {
+        return book;
+      }
+    }
+    return undefined;
+  }
+
+  remove(id) {
+    const index = this.#books.findIndex(function (book) {
+      return book.id === id;
+    });
+
+    if (index !== -1) {
+      this.#books.splice(index, 1);
+    }
+  }
+
+  get books() {
+    const books = [...this.#books];
+    return books;
   }
 }
 
